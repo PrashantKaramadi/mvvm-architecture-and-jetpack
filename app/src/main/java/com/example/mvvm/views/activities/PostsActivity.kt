@@ -8,13 +8,16 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mvvm.R
+import com.example.mvvm.data.database.AppDatabase
 import com.example.mvvm.databinding.ActivityPostsBinding
 import com.example.mvvm.views.adapters.PostAdapter
+import com.example.mvvm.views.adapters.PostViewModelFactory
 import com.example.mvvm.views.viewmodels.PostViewModel
 
 class PostsActivity : AppCompatActivity() {
     private lateinit var postViewModel: PostViewModel
     private lateinit var postBinding: ActivityPostsBinding
+    private lateinit var postViewModelFactory: PostViewModelFactory
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -27,12 +30,16 @@ class PostsActivity : AppCompatActivity() {
         }
 
         postBinding.rvPosts.layoutManager = LinearLayoutManager(this)
-        postViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application)
-            .create(PostViewModel::class.java)
+
+        val postDao = AppDatabase.getDatabase(applicationContext).postDuo()
+        postViewModelFactory = PostViewModelFactory(postDao)
+        postViewModel = ViewModelProvider(this, postViewModelFactory)[PostViewModel::class.java]
 
         postViewModel.posts.observe(this) { posts ->
             val adapter = PostAdapter(posts)
             postBinding.rvPosts.adapter = adapter
+            postViewModel.insertPosts(posts)
+            postViewModel.fetchPosts()
 
         }
     }
