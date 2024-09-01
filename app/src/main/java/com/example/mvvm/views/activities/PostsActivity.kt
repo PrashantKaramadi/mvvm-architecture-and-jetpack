@@ -7,12 +7,19 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import com.example.mvvm.R
 import com.example.mvvm.data.database.AppDatabase
+import com.example.mvvm.data.work_manager.PostWorkManager
 import com.example.mvvm.databinding.ActivityPostsBinding
 import com.example.mvvm.views.adapters.PostAdapter
 import com.example.mvvm.views.adapters.PostViewModelFactory
 import com.example.mvvm.views.viewmodels.PostViewModel
+import java.util.concurrent.TimeUnit
 
 class PostsActivity : AppCompatActivity() {
     private lateinit var postViewModel: PostViewModel
@@ -42,5 +49,18 @@ class PostsActivity : AppCompatActivity() {
             postViewModel.fetchPosts()
 
         }
+
+
+        val constraints =
+            Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+        val onetimeWorkManager =
+            OneTimeWorkRequest.Builder(PostWorkManager::class.java).setConstraints(constraints)
+                .build()
+        WorkManager.getInstance(applicationContext).enqueue(onetimeWorkManager)
+
+
+        val periodicWorkManager =
+            PeriodicWorkRequest.Builder(PostWorkManager::class.java, 15, TimeUnit.MINUTES).build()
+        WorkManager.getInstance(applicationContext).enqueue(periodicWorkManager)
     }
 }
