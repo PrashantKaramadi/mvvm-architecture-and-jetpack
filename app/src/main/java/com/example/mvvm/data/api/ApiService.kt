@@ -1,6 +1,6 @@
-package com.example.mvvm.network.api
+package com.example.mvvm.data.api
 
-import com.example.mvvm.model.Post
+import com.example.mvvm.data.model.Post
 import retrofit2.Call
 import retrofit2.http.GET
 
